@@ -1,0 +1,842 @@
+[gd_scene load_steps=10 format=3 uid="uid://b4fq88vm3vrur"]
+
+[ext_resource type="Texture2D" uid="uid://cylaq50g38p4n" path="res://Materials/beam.tres" id="1_u77jx"]
+[ext_resource type="Texture2D" uid="uid://ba358h837wqn6" path="res://Assets/button_right.svg" id="2_3n84q"]
+[ext_resource type="Texture2D" uid="uid://cakp8l8bbax82" path="res://Assets/button_left.svg" id="3_facs1"]
+[ext_resource type="AudioStream" uid="uid://cl11w2ib7o22o" path="res://Assets/Sounds/projector-button-push.wav" id="4_m114p"]
+
+[sub_resource type="GDScript" id="GDScript_iih17"]
+script/source = "extends Control
+
+var slide = 0
+var locked = false
+
+@onready var aperture := $Aperture
+@onready var clicker := $Clicker
+@onready var prev_slide := $Panel2/HBoxContainer/Prev_slide
+@onready var next_slide := $Panel2/HBoxContainer/Next_slide
+
+func _ready():
+	next_slide.grab_focus()
+
+func _on_prev_slide_pressed():
+	if locked: 
+		return
+	clicker.play()
+	var tween = get_tree().create_tween()
+	tween.tween_property(aperture, \"rotation_degrees\", -(slide - 1) * 60 , 1.5).set_trans(Tween.TRANS_SPRING)
+	tween.tween_callback(decrement_slide)
+
+func _on_next_slide_pressed():
+	if locked: 
+		return
+	locked = true
+	clicker.play()
+	var tween = get_tree().create_tween()
+	if slide == 5:
+		tween.tween_property(aperture, \"modulate\", Color.BLACK, 1.5).set_trans(Tween.TRANS_SINE)
+		tween.tween_callback(start_game)
+	else:
+		tween.tween_property(aperture, \"rotation_degrees\", -(slide + 1) * 60 , 1.5).set_trans(Tween.TRANS_SPRING)
+		tween.tween_callback(increment_slide)
+	
+func decrement_slide():
+	locked = false
+	slide -= 1
+	if slide == 0:
+		prev_slide.disabled = true
+	
+func increment_slide():
+	locked = false
+	slide += 1
+	prev_slide.disabled = false
+	
+func start_game():
+	Fader.fade()
+	await Fader.done_fading
+	get_tree().change_scene_to_file(\"res://Scenes/Frogger.tscn\")
+	Fader.unfade()
+	
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1qmu"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_032cs"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wk4mm"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_fguns"]
+random_pitch = 1.15
+random_volume_offset_db = 5.0
+streams_count = 1
+stream_0/stream = ExtResource("4_m114p")
+stream_0/weight = 1.0
+
+[node name="IntroProjector" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_iih17")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_y1qmu")
+
+[node name="Aperture" type="Node2D" parent="."]
+position = Vector2(-756, 512)
+
+[node name="slide1" type="Node2D" parent="Aperture"]
+
+[node name="contents" type="Node2D" parent="Aperture/slide1"]
+position = Vector2(500, 0)
+
+[node name="table" type="Node2D" parent="Aperture/slide1/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D" type="Line2D" parent="Aperture/slide1/contents/table"]
+position = Vector2(121, 0)
+points = PackedVector2Array(162, 71, 500, 71, 511, 89, 511, 143, 503, 154, 171, 153)
+default_color = Color(0.580301, 0.235506, 3.85046e-07, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="Aperture/slide1/contents/table"]
+position = Vector2(121, 0)
+points = PackedVector2Array(380, 154, 375, 289)
+width = 12.0
+default_color = Color(0.580301, 0.235506, 3.85046e-07, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="Aperture/slide1/contents/table"]
+position = Vector2(121, 0)
+points = PackedVector2Array(447, 292, 445, 154)
+width = 12.0
+default_color = Color(0.580301, 0.235506, 3.85046e-07, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Node2D" parent="Aperture/slide1/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D4" type="Line2D" parent="Aperture/slide1/contents/frog"]
+points = PackedVector2Array(601, 68, 573, 69, 528, 59, 527, 34)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="Aperture/slide1/contents/frog"]
+points = PackedVector2Array(469, 0, 521, -5, 545, -22, 598, -5, 600, 27, 526, 49, 458, 49, 419, 37, 435, 19)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide1/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(469, 0, 521, -5, 545, -22, 598, -5, 600, 27, 526, 49, 458, 49, 419, 37, 433, 20)
+
+[node name="Line2D5" type="Line2D" parent="Aperture/slide1/contents/frog"]
+points = PackedVector2Array(627, 23, 620, 41, 570, 52, 523, 16)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D6" type="Line2D" parent="Aperture/slide1/contents/frog"]
+points = PackedVector2Array(642, 36, 620, 41)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="Aperture/slide1/contents/frog"]
+points = PackedVector2Array(451, 69, 416, 68, 501, 25, 421, 36)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="Aperture/slide1/contents/frog"]
+points = PackedVector2Array(563, -12, 568, 4)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="wizard" type="Node2D" parent="Aperture/slide1/contents"]
+position = Vector2(-31, 69)
+
+[node name="Line2D8" type="Line2D" parent="Aperture/slide1/contents/wizard"]
+points = PackedVector2Array(1061, -43, 1123, -40, 1156, -162, 1100, -233, 1010, -232, 990, -168, 958, -125, 985, -127, 999, -65)
+closed = true
+width = 12.0
+default_color = Color(0.911278, 0.591364, 0.648566, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D10" type="Line2D" parent="Aperture/slide1/contents/wizard"]
+points = PackedVector2Array(1023, -166, 1035, -168, 1042, -178, 1033, -184, 1022, -183, 1015, -175)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D9" type="Line2D" parent="Aperture/slide1/contents/wizard"]
+points = PackedVector2Array(992, 227, 1015, 11, 1055, -43, 1154, -88, 1230, -77, 1140, -37, 1209, 60, 1221, 226)
+width = 12.0
+default_color = Color(0.431373, 0, 0.615686, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide1/contents/wizard/Line2D9"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(1061, -43, 1154, -88, 1230, -77, 1140, -37, 1209, 60, 1221, 226, 993, 225, 1097, 76)
+
+[node name="beard" type="Line2D" parent="Aperture/slide1/contents/wizard/Line2D9"]
+points = PackedVector2Array(996, 38, 1028, 26, 1062, -53, 1086, -66, 1069, -100, 1079, -143, 1104, -148, 1125, -116, 1135, -101, 1145, -102, 1157, -147, 1157, -161, 1110, -198, 1089, -171, 1066, -162, 1049, -99, 996, -78)
+closed = true
+width = 12.0
+default_color = Color(0.818764, 0.827606, 0.843894, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide1/contents/wizard/Line2D9/beard"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(996, 38, 1028, 26, 1062, -53, 1086, -66, 1069, -100, 1079, -143, 1104, -148, 1125, -116, 1135, -101, 1145, -102, 1157, -147, 1157, -161, 1119, -164, 1066, -162, 1049, -99, 996, -78)
+
+[node name="hat" type="Line2D" parent="Aperture/slide1/contents/wizard/Line2D9"]
+points = PackedVector2Array(890, -187, 940, -247, 1021, -256, 1087, -305, 1171, -316, 1217, -298, 1216, -261, 1241, -258, 1229, -220, 1242, -169, 1203, -210, 1220, -240, 1190, -251, 1193, -273, 1156, -259, 1146, -237, 1200, -167, 1233, -102, 1158, -163, 994, -206)
+closed = true
+width = 12.0
+default_color = Color(0.431373, 0, 0.615686, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide1/contents/wizard/Line2D9/hat"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(890, -187, 940, -247, 1021, -256, 1087, -305, 1171, -316, 1217, -298, 1216, -261, 1241, -258, 1229, -220, 1242, -169, 1203, -210, 1220, -240, 1190, -251, 1193, -273, 1156, -259, 1146, -237, 1200, -167, 1233, -102, 1158, -163, 994, -206)
+
+[node name="slide2" type="Node2D" parent="Aperture"]
+rotation = 1.0472
+
+[node name="contents" type="Node2D" parent="Aperture/slide2"]
+position = Vector2(500, 0)
+
+[node name="table" type="Node2D" parent="Aperture/slide2/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D" type="Line2D" parent="Aperture/slide2/contents/table"]
+position = Vector2(121, 0)
+points = PackedVector2Array(162, 71, 500, 71, 511, 89, 511, 143, 503, 154, 171, 153)
+default_color = Color(0.580301, 0.235506, 3.85046e-07, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="Aperture/slide2/contents/table"]
+position = Vector2(121, 0)
+points = PackedVector2Array(380, 154, 375, 289)
+width = 12.0
+default_color = Color(0.580301, 0.235506, 3.85046e-07, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="Aperture/slide2/contents/table"]
+position = Vector2(121, 0)
+points = PackedVector2Array(447, 292, 445, 154)
+width = 12.0
+default_color = Color(0.580301, 0.235506, 3.85046e-07, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Node2D" parent="Aperture/slide2/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D4" type="Line2D" parent="Aperture/slide2/contents/frog"]
+points = PackedVector2Array(601, 68, 573, 69, 528, 59, 527, 34)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="Aperture/slide2/contents/frog"]
+points = PackedVector2Array(469, 0, 521, -5, 545, -22, 598, -5, 600, 27, 526, 49, 458, 49, 419, 37, 435, 19)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide2/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(469, 0, 521, -5, 545, -22, 598, -5, 600, 27, 526, 49, 458, 49, 419, 37, 433, 20)
+
+[node name="Line2D5" type="Line2D" parent="Aperture/slide2/contents/frog"]
+points = PackedVector2Array(608, 69, 579, 70, 553, 52, 523, 16)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="Aperture/slide2/contents/frog"]
+points = PackedVector2Array(451, 69, 416, 68, 501, 25, 421, 36)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="Aperture/slide2/contents/frog"]
+points = PackedVector2Array(563, -12, 568, 4)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="wizard" type="Node2D" parent="Aperture/slide2/contents"]
+position = Vector2(-31, 68.9999)
+
+[node name="head" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(1061, -43, 1123, -40, 1156, -162, 1100, -233, 1010, -232, 990, -168, 958, -125, 985, -127, 999, -65)
+closed = true
+width = 12.0
+default_color = Color(0.911278, 0.591364, 0.648566, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="eye" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(1023, -166, 1035, -168, 1042, -178, 1033, -184, 1022, -183, 1015, -175)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(744, -14, 728, -60, 737, -96, 771, -131, 813, -138, 858, -115, 873, -81, 874, -43, 843, -9)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="river" type="Line2D" parent="Aperture/slide2/contents/wizard/orb"]
+points = PackedVector2Array(772, -32, 805, -47, 793, -62, 767, -68, 761, -80, 796, -95, 825, -99, 828, -93, 800, -87, 783, -76, 813, -71, 845, -50, 849, -38, 816, -19)
+width = 12.0
+default_color = Color(0, 0.333333, 1, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="hand" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(764, 23, 736, 17, 692, -17, 706, -42, 728, -46, 769, -14, 838, -7, 877, -34, 896, -25, 868, 1)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide2/contents/wizard/hand"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(764, 23, 736, 17, 692, -17, 706, -42, 728, -46, 769, -14, 838, -7, 877, -34, 896, -25, 868, 1)
+
+[node name="arm" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(1005, 124, 893, 224, 861, 230, 813, 211, 776, 38, 760, 26, 779, 8, 867, -3, 869, 23, 860, 35, 877, 115, 863, 142, 885, 118, 1014, 21)
+width = 12.0
+default_color = Color(0.431373, 0, 0.615686, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide2/contents/wizard/arm"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(1005, 124, 893, 224, 861, 230, 813, 211, 776, 38, 760, 26, 779, 8, 867, -3, 869, 23, 860, 35, 877, 115, 863, 142, 885, 118, 1014, 21)
+
+[node name="cloak" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(992, 227, 1015, 11, 1055, -43, 1154, -88, 1230, -77, 1140, -37, 1209, 60, 1221, 226)
+width = 12.0
+default_color = Color(0.431373, 0, 0.615686, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide2/contents/wizard/cloak"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(992, 227, 1015, 11, 1055, -43, 1154, -88, 1230, -77, 1140, -37, 1209, 60, 1221, 226)
+
+[node name="beard" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(996, 38, 1028, 26, 1062, -53, 1086, -66, 1069, -100, 1079, -143, 1104, -148, 1125, -116, 1135, -101, 1145, -102, 1157, -147, 1157, -161, 1110, -198, 1089, -171, 1066, -162, 1049, -99, 996, -78)
+closed = true
+width = 12.0
+default_color = Color(0.818764, 0.827606, 0.843894, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide2/contents/wizard/beard"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(996, 38, 1028, 26, 1062, -53, 1086, -66, 1069, -100, 1079, -143, 1104, -148, 1125, -116, 1135, -101, 1145, -102, 1157, -147, 1157, -161, 1110, -194, 1094, -177, 1066, -162, 1049, -99, 996, -78)
+
+[node name="hat" type="Line2D" parent="Aperture/slide2/contents/wizard"]
+points = PackedVector2Array(890, -187, 940, -247, 1021, -256, 1087, -305, 1171, -316, 1217, -298, 1216, -261, 1241, -258, 1229, -220, 1242, -169, 1203, -210, 1220, -240, 1190, -251, 1193, -273, 1156, -259, 1146, -237, 1200, -167, 1233, -102, 1158, -163, 994, -206)
+closed = true
+width = 12.0
+default_color = Color(0.431373, 0, 0.615686, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide2/contents/wizard/hat"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(890, -187, 940, -247, 1021, -256, 1087, -305, 1171, -316, 1217, -298, 1216, -261, 1241, -258, 1229, -220, 1242, -169, 1203, -210, 1220, -240, 1190, -251, 1193, -273, 1156, -259, 1146, -237, 1200, -167, 1233, -102, 1158, -163, 994, -206)
+
+[node name="slide3" type="Node2D" parent="Aperture"]
+rotation = 2.0944
+
+[node name="contents" type="Node2D" parent="Aperture/slide3"]
+position = Vector2(500, 0)
+
+[node name="river" type="Line2D" parent="Aperture/slide3/contents"]
+points = PackedVector2Array(537, 249, 789, 169, 835, 148, 796, 114, 677, 105, 563, 66, 545, 42, 572, 27, 716, 6, 755, -9, 731, -20, 664, -11, 569, -12, 503, -43, 459, -112, 541, -161, 751, -181, 965, -164, 1076, -119, 1071, -67, 933, -37, 867, -13, 820, 3, 746, 27, 648, 45, 781, 64, 960, 59, 1075, 85, 1086, 149, 926, 258)
+width = 12.0
+default_color = Color(0, 0.333333, 1, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb" type="Line2D" parent="Aperture/slide3/contents"]
+points = PackedVector2Array(1102, -276, 1205, -132, 1194, 111, 1084, 269)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb2" type="Line2D" parent="Aperture/slide3/contents"]
+points = PackedVector2Array(466, 288, 353, 157, 353, -109, 478, -286)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arrow" type="Line2D" parent="Aperture/slide3/contents"]
+points = PackedVector2Array(840, 101, 918, 121, 933, 152, 911, 194, 817, 246)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb3" type="Line2D" parent="Aperture/slide3/contents/arrow"]
+points = PackedVector2Array(885, 93, 840, 101, 873, 122)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arrow2" type="Line2D" parent="Aperture/slide3/contents"]
+points = PackedVector2Array(589, -78, 658, -126, 783, -142, 893, -135, 966, -89)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide4" type="Node2D" parent="Aperture"]
+rotation = 3.14159
+
+[node name="contents" type="Node2D" parent="Aperture/slide4"]
+position = Vector2(500, 0)
+
+[node name="river" type="Line2D" parent="Aperture/slide4/contents"]
+position = Vector2(0, 127)
+points = PackedVector2Array(796, 114, 677, 105, 563, 66, 545, 42, 572, 27, 716, 6, 755, -9, 731, -20, 664, -11, 569, -12, 503, -43, 459, -112, 541, -161, 751, -181, 965, -164, 1076, -119, 1071, -67, 933, -37, 867, -13, 820, 3, 746, 27, 648, 45, 781, 64, 960, 59, 1044, 115)
+width = 12.0
+default_color = Color(0, 0.333333, 1, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb" type="Line2D" parent="Aperture/slide4/contents"]
+points = PackedVector2Array(1102, -276, 1205, -132, 1194, 111, 1084, 269)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb2" type="Line2D" parent="Aperture/slide4/contents"]
+points = PackedVector2Array(466, 288, 353, 157, 353, -109, 478, -286)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arrow" type="Line2D" parent="Aperture/slide4/contents"]
+position = Vector2(0, 127)
+points = PackedVector2Array(803, -195, 725, -294, 784, -271, 772, -381, 842, -376, 826, -267, 883, -271)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arrow2" type="Line2D" parent="Aperture/slide4/contents"]
+position = Vector2(0, 127)
+points = PackedVector2Array(589, -78, 658, -126, 783, -142, 893, -135, 966, -89)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide5" type="Node2D" parent="Aperture"]
+rotation = 4.18879
+
+[node name="contents" type="Node2D" parent="Aperture/slide5"]
+position = Vector2(500, 0)
+
+[node name="river" type="Line2D" parent="Aperture/slide5/contents"]
+position = Vector2(28, 195)
+points = PackedVector2Array(377, -33, 354, -85, 405, -121, 563, -168, 751, -181, 965, -164, 1076, -119, 1113, -81, 1074, -26)
+width = 12.0
+default_color = Color(0, 0.333333, 1, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb" type="Line2D" parent="Aperture/slide5/contents"]
+points = PackedVector2Array(1102, -276, 1205, -132, 1194, 111, 1084, 269)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb2" type="Line2D" parent="Aperture/slide5/contents"]
+points = PackedVector2Array(466, 288, 353, 157, 353, -109, 478, -286)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="ground" type="Line2D" parent="Aperture/slide5/contents"]
+points = PackedVector2Array(449, 145, 584, 94, 777, 69, 950, 93, 1056, 156)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="Aperture/slide5/contents"]
+position = Vector2(-13, 81)
+
+[node name="head" type="Line2D" parent="Aperture/slide5/contents/princess"]
+points = PackedVector2Array(819, -188, 814, -200, 806, -201, 810, -213, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="Aperture/slide5/contents/princess"]
+points = PackedVector2Array(720, -151, 744, -154, 775, -130, 808, -157)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Line2D" parent="Aperture/slide5/contents/princess"]
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="Aperture/slide5/contents/princess/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="Aperture/slide5/contents/princess/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="Aperture/slide5/contents/princess/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="Aperture/slide5/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="Aperture/slide5/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide5/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="Aperture/slide5/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide5/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="slide6" type="Node2D" parent="Aperture"]
+rotation = 5.23599
+
+[node name="contents" type="Node2D" parent="Aperture/slide6"]
+position = Vector2(500, 0)
+
+[node name="river" type="Line2D" parent="Aperture/slide6/contents"]
+position = Vector2(28, 195)
+points = PackedVector2Array(377, -33, 354, -85, 405, -121, 563, -168, 751, -181, 965, -164, 1076, -119, 1113, -81, 1074, -26)
+width = 12.0
+default_color = Color(0, 0.333333, 1, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb" type="Line2D" parent="Aperture/slide6/contents"]
+points = PackedVector2Array(1102, -276, 1205, -132, 1194, 111, 1084, 269)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="orb2" type="Line2D" parent="Aperture/slide6/contents"]
+points = PackedVector2Array(466, 288, 353, 157, 353, -109, 478, -286)
+width = 12.0
+default_color = Color(0.579482, 0.866807, 0.716827, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="ground" type="Line2D" parent="Aperture/slide6/contents"]
+points = PackedVector2Array(449, 145, 584, 94, 777, 69, 950, 93, 1056, 156)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="zap" type="Line2D" parent="Aperture/slide6/contents"]
+points = PackedVector2Array(656, -260, 682, -233, 670, -218, 689, -198)
+width = 12.0
+default_color = Color(1, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="zap2" type="Line2D" parent="Aperture/slide6/contents"]
+points = PackedVector2Array(803, -242, 782, -225, 784, -200, 765, -184)
+width = 12.0
+default_color = Color(1, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="zap3" type="Line2D" parent="Aperture/slide6/contents"]
+points = PackedVector2Array(564, -125, 592, -135, 609, -120, 641, -139)
+width = 12.0
+default_color = Color(1, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="Aperture/slide6/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="Aperture/slide6/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="Aperture/slide6/contents/princess"]
+points = PackedVector2Array(748, -186, 753, -166, 780, -125, 808, -157)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="Aperture/slide6/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="Aperture/slide6/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide6/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="Aperture/slide6/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide6/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="prince" type="Node2D" parent="Aperture/slide6/contents"]
+position = Vector2(-127, 81)
+
+[node name="head" type="Line2D" parent="Aperture/slide6/contents/prince"]
+points = PackedVector2Array(822, -188, 818, -200, 810, -217, 811, -236, 824, -246, 845, -248, 858, -240, 858, -222, 864, -209, 856, -205, 859, -192, 856, -184)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="Aperture/slide6/contents/prince"]
+points = PackedVector2Array(928, -182, 924, -161, 895, -129, 863, -169)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="Aperture/slide6/contents/prince"]
+points = PackedVector2Array(817, -99, 819, -134, 816, -163, 804, -171, 806, -182, 819, -187, 848, -173, 855, -185, 864, -178, 863, -161, 866, -129, 865, -98, 870, -60)
+width = 12.0
+default_color = Color(0.863905, 0.912309, 0.946267, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="cape" type="Line2D" parent="Aperture/slide6/contents/prince"]
+points = PackedVector2Array(709, -22, 757, -64, 787, -113, 790, -142, 806, -182, 819, -187, 831, -182, 835, -171, 816, -141, 802, -68, 791, -20, 753, -6)
+closed = true
+width = 12.0
+default_color = Color(0.494097, 0.195874, 1, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide6/contents/prince/cape"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -22, 757, -64, 787, -113, 790, -142, 806, -182, 819, -187, 839, -171, 816, -141, 802, -68, 791, -20, 753, -6)
+
+[node name="shoe" type="Line2D" parent="Aperture/slide6/contents/prince"]
+position = Vector2(0, -34)
+points = PackedVector2Array(821, 47, 833, 57, 836, 67, 806, 64, 798, 60, 793, 63, 782, 63, 786, 41)
+width = 12.0
+default_color = Color(0.329412, 0.184314, 0.176471, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="shoe2" type="Line2D" parent="Aperture/slide6/contents/prince"]
+position = Vector2(66, -24)
+points = PackedVector2Array(815, 41, 832, 42, 839, 58, 812, 60, 801, 52, 797, 60, 785, 58, 787, 41)
+width = 12.0
+default_color = Color(0.329412, 0.184314, 0.176471, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="Aperture/slide6/contents/prince"]
+position = Vector2(0, -31)
+points = PackedVector2Array(786, 41, 814, -12, 815, -66, 866, -66, 884, -6, 882, 47, 850, 49, 849, 0, 849, -24, 846, -2, 819, 47)
+closed = true
+width = 12.0
+default_color = Color(0.682085, 0.392567, 0.377553, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide6/contents/prince/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(786, 41, 814, -12, 815, -66, 866, -66, 884, -6, 882, 47, 850, 49, 849, 0, 850, -33, 847, -6, 819, 47)
+
+[node name="head2" type="Line2D" parent="Aperture/slide6/contents/prince"]
+points = PackedVector2Array(831, -213, 822, -198, 812, -204, 798, -186, 803, -221, 789, -216, 801, -241, 815, -251, 837, -256, 855, -249, 866, -233, 852, -239, 842, -227)
+closed = true
+width = 12.0
+default_color = Color(0.879268, 0.478916, 1.92523e-06, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="Aperture/slide6/contents/prince/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(831, -213, 822, -198, 812, -204, 804, -189, 803, -221, 784, -216, 801, -241, 815, -251, 837, -256, 855, -249, 866, -233, 852, -239, 842, -227)
+
+[node name="Panel2" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_032cs")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel2"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Prev_slide" type="Button" parent="Panel2/HBoxContainer"]
+layout_mode = 2
+disabled = true
+icon = ExtResource("2_3n84q")
+
+[node name="Next_slide" type="Button" parent="Panel2/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("3_facs1")
+
+[node name="Panel3" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_wk4mm")
+
+[node name="Clicker" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamRandomizer_fguns")
+
+[connection signal="pressed" from="Panel2/HBoxContainer/Prev_slide" to="." method="_on_prev_slide_pressed"]
+[connection signal="pressed" from="Panel2/HBoxContainer/Next_slide" to="." method="_on_next_slide_pressed"]

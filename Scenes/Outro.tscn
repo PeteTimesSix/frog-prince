@@ -1,0 +1,1502 @@
+[gd_scene load_steps=10 format=3 uid="uid://b6ps2eg5o32ad"]
+
+[ext_resource type="Texture2D" uid="uid://cylaq50g38p4n" path="res://Materials/beam.tres" id="1_u77jx"]
+[ext_resource type="Texture2D" uid="uid://ba358h837wqn6" path="res://Assets/button_right.svg" id="2_3n84q"]
+[ext_resource type="Texture2D" uid="uid://cakp8l8bbax82" path="res://Assets/button_left.svg" id="3_facs1"]
+[ext_resource type="AudioStream" uid="uid://cl11w2ib7o22o" path="res://Assets/Sounds/projector-button-push.wav" id="4_m114p"]
+
+[sub_resource type="GDScript" id="GDScript_iih17"]
+script/source = "extends Control
+
+var slide = 0
+var locked = false
+
+@onready var aperture_l := $aperture_slide_l/Aperture_l
+@onready var aperture_r := $aperture_slide_r/Aperture_r
+@onready var aperture_slide_l := $aperture_slide_l
+@onready var aperture_slide_r := $aperture_slide_r
+@onready var clicker := $Clicker
+@onready var prev_slide := $Panel2/HBoxContainer/Prev_slide
+@onready var next_slide := $Panel2/HBoxContainer/Next_slide
+
+func _ready():
+	next_slide.grab_focus()
+
+func _on_prev_slide_pressed():
+	if locked:
+		return
+	locked = true
+	clicker.play()
+	var tween = get_tree().create_tween()
+	if slide < 7:
+		if slide == 6:
+			tween.tween_property(aperture_slide_r, \"position\", Vector2(1024, 0), 0.5).set_trans(Tween.TRANS_SINE)
+			tween.tween_property(aperture_slide_l, \"position\", Vector2.ZERO, 0.5).set_trans(Tween.TRANS_SINE)
+		else:
+			tween.tween_property(aperture_l, \"rotation_degrees\", -(slide - 1) * 60 , 1.5).set_trans(Tween.TRANS_SPRING)
+		tween.tween_callback(decrement_slide)
+	else:
+		tween.tween_property(aperture_r, \"rotation_degrees\", ((slide - 6) - 1) * 60 , 1.5).set_trans(Tween.TRANS_SPRING)
+		tween.tween_callback(decrement_slide)
+
+func _on_next_slide_pressed():
+	if locked:
+		return
+	locked = true
+	clicker.play()
+	var tween = get_tree().create_tween()
+	if slide < 6:
+		if slide == 5:
+			tween.tween_property(aperture_slide_l, \"position\", Vector2(-1024, 0), 0.5).set_trans(Tween.TRANS_SINE)
+			tween.tween_property(aperture_slide_r, \"position\", Vector2.ZERO, 0.5).set_trans(Tween.TRANS_SINE)
+		else:
+			tween.tween_property(aperture_l, \"rotation_degrees\", -(slide + 1) * 60 , 1.5).set_trans(Tween.TRANS_SPRING)
+		tween.tween_callback(increment_slide)
+	else:
+		if slide == 11:
+			tween.tween_property(aperture_r, \"modulate\", Color.BLACK, 1.5).set_trans(Tween.TRANS_SINE)
+			tween.tween_callback(end_game)
+		else:
+			tween.tween_property(aperture_r, \"rotation_degrees\", ((slide - 6) + 1) * 60 , 1.5).set_trans(Tween.TRANS_SPRING)
+			tween.tween_callback(increment_slide)
+		
+	
+func decrement_slide():
+	locked = false
+	slide -= 1
+	if slide == 0:
+		prev_slide.disabled = true
+	
+func increment_slide():
+	locked = false
+	slide += 1
+	prev_slide.disabled = false
+	
+func end_game():
+	Fader.fade()
+	await Fader.done_fading
+	get_tree().change_scene_to_file(\"res://Scenes/MainMenu.tscn\")
+	Fader.unfade()
+	
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1qmu"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_032cs"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wk4mm"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_fguns"]
+random_pitch = 1.15
+random_volume_offset_db = 5.0
+streams_count = 1
+stream_0/stream = ExtResource("4_m114p")
+stream_0/weight = 1.0
+
+[node name="OutroProjector" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_iih17")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_y1qmu")
+
+[node name="aperture_slide_l" type="Node2D" parent="."]
+
+[node name="Aperture_l" type="Node2D" parent="aperture_slide_l"]
+position = Vector2(-756, 512)
+
+[node name="slide1" type="Node2D" parent="aperture_slide_l/Aperture_l"]
+
+[node name="contents" type="Node2D" parent="aperture_slide_l/Aperture_l/slide1"]
+position = Vector2(500, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_l/Aperture_l/slide1/contents"]
+
+[node name="Line2D9" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/terrain"]
+position = Vector2(28, 103)
+points = PackedVector2Array(986, 168, 894, 104, 771, 75, 679, 12, 476, -15, 326, 18, 259, 16)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_l/Aperture_l/slide1/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess"]
+points = PackedVector2Array(766, -71, 778, -87, 780, -125, 808, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess"]
+points = PackedVector2Array(823, -224, 809, -211, 794, -199, 790, -218, 806, -255, 831, -265, 867, -255, 880, -228, 883, -204, 852, -223, 881, -175, 889, -111, 897, -64, 872, -93, 860, -53, 837, -84, 818, -60, 805, -92, 817, -185)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide1/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(823, -224, 809, -211, 794, -199, 790, -218, 806, -255, 831, -265, 867, -255, 880, -228, 883, -204, 852, -223, 881, -175, 889, -111, 897, -64, 872, -93, 860, -53, 837, -84, 818, -60, 805, -92, 817, -185)
+
+[node name="frog" type="Node2D" parent="aperture_slide_l/Aperture_l/slide1/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D8" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+points = PackedVector2Array(602, 88, 586, 97, 582, 87)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+points = PackedVector2Array(488, 35, 510, 11, 528, -24, 541, -24, 547, -17, 571, -18, 576, -23, 594, -22, 598, -5, 600, 27, 577, 35, 569, 58, 532, 79, 479, 79, 468, 54)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(496, 25, 518, -1, 528, -24, 542, -17, 571, -18, 594, -22, 598, -5, 600, 27, 577, 35, 569, 58, 532, 79, 479, 79, 468, 54)
+
+[node name="Line2D4" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+points = PackedVector2Array(608, 104, 584, 99, 530, 132, 539, 55)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D5" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+points = PackedVector2Array(620, 43, 630, 55, 613, 73, 557, 32)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D6" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+points = PackedVector2Array(651, 52, 628, 54, 638, 45)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+position = Vector2(0, 13)
+points = PackedVector2Array(450, 95, 432, 93, 407, 77, 476, 57)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D7" type="Line2D" parent="aperture_slide_l/Aperture_l/slide1/contents/frog"]
+position = Vector2(0, 13)
+points = PackedVector2Array(447, 83, 427, 91, 424, 79)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide2" type="Node2D" parent="aperture_slide_l/Aperture_l"]
+rotation = 1.0472
+
+[node name="contents" type="Node2D" parent="aperture_slide_l/Aperture_l/slide2"]
+position = Vector2(500, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_l/Aperture_l/slide2/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_l/Aperture_l/slide2/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess"]
+points = PackedVector2Array(759, -187, 746, -171, 780, -125, 808, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="frog" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess"]
+position = Vector2(-127, 174)
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide2/contents/princess/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="slide3" type="Node2D" parent="aperture_slide_l/Aperture_l"]
+rotation = 2.0944
+
+[node name="contents" type="Node2D" parent="aperture_slide_l/Aperture_l/slide3"]
+position = Vector2(500, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_l/Aperture_l/slide3/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_l/Aperture_l/slide3/contents"]
+position = Vector2(1757, 86)
+scale = Vector2(-1, 1)
+
+[node name="head" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="arm" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/princess"]
+points = PackedVector2Array(950, -131, 941, -117, 899, -119, 855, -163)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents"]
+position = Vector2(-73, 256)
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog6" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/frog"]
+position = Vector2(6, -74)
+points = PackedVector2Array(729, -203, 738, -159, 746, -203)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog7" type="Line2D" parent="aperture_slide_l/Aperture_l/slide3/contents/frog"]
+position = Vector2(6, -74)
+points = PackedVector2Array(730, -142, 738, -150, 746, -142, 738, -134)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide3/contents/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="slide4" type="Node2D" parent="aperture_slide_l/Aperture_l"]
+rotation = 3.14159
+
+[node name="contents" type="Node2D" parent="aperture_slide_l/Aperture_l/slide4"]
+position = Vector2(500, 0)
+
+[node name="frog" type="Node2D" parent="aperture_slide_l/Aperture_l/slide4/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D4" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog"]
+points = PackedVector2Array(595, 67, 573, 69, 548, 59, 527, 34)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog"]
+points = PackedVector2Array(487, 7, 517, 1, 566, -19, 588, -17, 596, -7, 608, 1, 610, 16, 596, 41, 526, 49, 461, 42, 416, 27, 430, 7)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(487, 7, 517, 1, 566, -19, 588, -17, 596, -7, 608, 1, 610, 16, 596, 41, 526, 49, 461, 42, 416, 27, 430, 7)
+
+[node name="Line2D5" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog"]
+points = PackedVector2Array(614, 16, 616, 34, 583, 60, 517, 18)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D6" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog"]
+position = Vector2(-13, -7)
+points = PackedVector2Array(640, 28, 630, 40)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog"]
+points = PackedVector2Array(445, 68, 415, 63, 491, 38, 439, 18)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/frog"]
+points = PackedVector2Array(583, -8, 581, 6)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="terrain" type="Node2D" parent="aperture_slide_l/Aperture_l/slide4/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_l/Aperture_l/slide4/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1045, -149, 678, -128, 262, -131)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide5" type="Node2D" parent="aperture_slide_l/Aperture_l"]
+rotation = 4.18879
+
+[node name="contents" type="Node2D" parent="aperture_slide_l/Aperture_l/slide5"]
+position = Vector2(500, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_l/Aperture_l/slide5/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1045, -149, 678, -128, 262, -131)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Node2D" parent="aperture_slide_l/Aperture_l/slide5/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D4" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(601, 68, 573, 69, 528, 59, 527, 34)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(469, 0, 521, -5, 545, -22, 598, -5, 600, 27, 526, 49, 458, 49, 419, 37, 435, 19)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(469, 0, 521, -5, 545, -22, 598, -5, 600, 27, 526, 49, 458, 49, 419, 37, 433, 20)
+
+[node name="Line2D7" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(555, -36, 521, -29, 502, -57, 523, -49, 527, -70, 543, -53, 557, -71)
+closed = true
+width = 12.0
+default_color = Color(1, 0.827451, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D5" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(567, -54, 569, -35, 565, 19, 523, 16)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D6" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(580, -49, 569, -35)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(451, 69, 416, 68, 501, 25, 421, 36)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide5/contents/frog"]
+points = PackedVector2Array(554, -14, 560, 0)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide6" type="Node2D" parent="aperture_slide_l/Aperture_l"]
+rotation = 5.23599
+
+[node name="contents" type="Node2D" parent="aperture_slide_l/Aperture_l/slide6"]
+position = Vector2(500, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_l/Aperture_l/slide6/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_l/Aperture_l/slide6/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+points = PackedVector2Array(793, -188, 796, -175, 780, -125, 808, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+points = PackedVector2Array(826, -188, 814, -175, 849, -133, 857, -167)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="frog" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess"]
+position = Vector2(-127, 174)
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog6" type="Line2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/frog"]
+points = PackedVector2Array(747, -210, 738, -208, 731, -215, 726, -206, 716, -202, 728, -191, 744, -195)
+closed = true
+width = 12.0
+default_color = Color(1, 0.862745, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_l/Aperture_l/slide6/contents/princess/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="aperture_slide_r" type="Node2D" parent="."]
+position = Vector2(1024, 0)
+
+[node name="Aperture_r" type="Node2D" parent="aperture_slide_r"]
+position = Vector2(1790, 512)
+
+[node name="slide7" type="Node2D" parent="aperture_slide_r/Aperture_r"]
+
+[node name="contents" type="Node2D" parent="aperture_slide_r/Aperture_r/slide7"]
+position = Vector2(-2050, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_r/Aperture_r/slide7/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents"]
+position = Vector2(76, 263)
+rotation = -0.261799
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide7/contents/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="frog6" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/frog"]
+points = PackedVector2Array(747, -210, 738, -208, 731, -215, 726, -206, 716, -202, 728, -191, 744, -195)
+closed = true
+width = 12.0
+default_color = Color(1, 0.862745, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_r/Aperture_r/slide7/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess"]
+points = PackedVector2Array(733, -131, 740, -146, 793, -112, 808, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm2" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess"]
+points = PackedVector2Array(754, -137, 763, -153, 819, -131, 856, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide7/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="slide8" type="Node2D" parent="aperture_slide_r/Aperture_r"]
+rotation = -1.0472
+
+[node name="contents" type="Node2D" parent="aperture_slide_r/Aperture_r/slide8"]
+position = Vector2(-2050, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_r/Aperture_r/slide8/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents"]
+position = Vector2(32, -151)
+rotation = 0.261799
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide8/contents/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="frog6" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/frog"]
+points = PackedVector2Array(747, -210, 738, -208, 731, -215, 726, -206, 716, -202, 728, -191, 744, -195)
+closed = true
+width = 12.0
+default_color = Color(1, 0.862745, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_r/Aperture_r/slide8/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess"]
+points = PackedVector2Array(717, -181, 734, -176, 762, -137, 808, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm2" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess"]
+points = PackedVector2Array(742, -182, 756, -186, 803, -147, 861, -170)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide8/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="slide9" type="Node2D" parent="aperture_slide_r/Aperture_r"]
+rotation = -2.0944
+
+[node name="contents" type="Node2D" parent="aperture_slide_r/Aperture_r/slide9"]
+position = Vector2(-2050, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_r/Aperture_r/slide9/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="claw" type="Node2D" parent="aperture_slide_r/Aperture_r/slide9/contents"]
+
+[node name="Line2D12" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw"]
+position = Vector2(32, 103)
+points = PackedVector2Array(969, -228, 938, -242, 968, -248)
+width = 12.0
+default_color = Color(0.952068, 0.793693, 0.644738, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D13" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw"]
+position = Vector2(32, 103)
+points = PackedVector2Array(994, -155, 955, -155, 986, -176)
+width = 12.0
+default_color = Color(0.952068, 0.793693, 0.644738, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D14" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw"]
+position = Vector2(32, 103)
+points = PackedVector2Array(1064, -120, 1027, -108, 1048, -134)
+width = 12.0
+default_color = Color(0.952068, 0.793693, 0.644738, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw"]
+position = Vector2(32, 103)
+points = PackedVector2Array(1224, -207, 1146, -156, 1076, -117, 1047, -121, 1046, -143, 1085, -158, 1134, -195, 1078, -167, 1002, -148, 983, -165, 988, -187, 1046, -204, 1085, -223, 1033, -215, 980, -216, 969, -226, 968, -247, 977, -260, 1025, -260, 1093, -266, 1122, -271, 1143, -286)
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D11" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw"]
+position = Vector2(32, 103)
+points = PackedVector2Array(1089, -237, 1073, -213, 1073, -244)
+width = 12.0
+default_color = Color(0.952068, 0.793693, 0.644738, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D15" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw"]
+position = Vector2(32, 103)
+points = PackedVector2Array(1151, -288, 1115, -277, 1092, -238, 1072, -242, 1068, -258, 1085, -310, 1123, -327, 1188, -330, 1224, -321)
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide9/contents/claw/Line2D15"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(1155, -287, 1115, -277, 1092, -238, 1072, -242, 1068, -258, 1085, -310, 1123, -327, 1188, -330, 1224, -321)
+
+[node name="frog" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents"]
+position = Vector2(54, -151)
+rotation = 0.261799
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide9/contents/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="frog6" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/frog"]
+points = PackedVector2Array(747, -210, 738, -208, 731, -215, 726, -206, 716, -202, 728, -191, 744, -195)
+closed = true
+width = 12.0
+default_color = Color(1, 0.862745, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="princess" type="Node2D" parent="aperture_slide_r/Aperture_r/slide9/contents"]
+position = Vector2(54, 81)
+
+[node name="head" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess"]
+points = PackedVector2Array(818, -187, 813, -192, 813, -203, 805, -207, 810, -217, 811, -236, 828, -249, 851, -249, 862, -211, 853, -188, 853, -182)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess"]
+points = PackedVector2Array(735, -180, 751, -176, 776, -131, 808, -165)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="body" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess"]
+points = PackedVector2Array(814, -60, 819, -132, 808, -143, 810, -165, 804, -171, 806, -182, 819, -187, 826, -179, 852, -184, 864, -178, 863, -161, 854, -153, 858, -121, 861, -102, 870, -60)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="arm2" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess"]
+points = PackedVector2Array(760, -177, 776, -184, 808, -138, 861, -170)
+width = 12.0
+default_color = Color(0.909804, 0.592157, 0.647059, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="skirt" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess"]
+position = Vector2(0, -31)
+points = PackedVector2Array(769, 51, 772, -41, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 63)
+closed = true
+width = 12.0
+default_color = Color(0.86956, 0.784462, 0.890162, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess/skirt"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(769, 53, 773, -40, 814, -81, 861, -83, 901, -62, 918, -29, 934, 53, 919, 61, 906, 55, 895, 66, 851, 65, 840, 55, 829, 64, 777, 61)
+
+[node name="head2" type="Line2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess"]
+points = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+closed = true
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide9/contents/princess/head2"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(838, -225, 822, -216, 811, -235, 790, -218, 806, -255, 831, -265, 867, -255, 875, -230, 866, -215, 892, -166, 892, -126, 873, -110, 870, -165, 853, -215)
+
+[node name="slide10" type="Node2D" parent="aperture_slide_r/Aperture_r"]
+rotation = -3.14159
+
+[node name="contents" type="Node2D" parent="aperture_slide_r/Aperture_r/slide10"]
+position = Vector2(-2050, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_r/Aperture_r/slide10/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="claw" type="Node2D" parent="aperture_slide_r/Aperture_r/slide10/contents"]
+
+[node name="Line2D15" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/claw"]
+position = Vector2(25, 125)
+points = PackedVector2Array(973, -314, 985, -300, 1005, -309, 998, -339, 968, -346, 949, -324, 960, -284, 1009, -278, 1072, -306, 1130, -368)
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D16" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/claw"]
+position = Vector2(25, 125)
+points = PackedVector2Array(968, -172, 977, -193, 997, -191, 1003, -171, 975, -154, 948, -162, 948, -190, 975, -215, 1061, -263, 1182, -279)
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents"]
+position = Vector2(1284, 281)
+rotation = -2.35619
+points = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+closed = true
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog4" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/frog"]
+position = Vector2(-5, 0)
+points = PackedVector2Array(747, -185, 750, -177)
+closed = true
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog3" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/frog"]
+points = PackedVector2Array(714, -165, 730, -167, 718, -151)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog5" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/frog"]
+points = PackedVector2Array(734, -169, 738, -159, 749, -155)
+width = 12.0
+default_color = Color(0, 0.988235, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide10/contents/frog"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(709, -158, 730, -162, 749, -167, 754, -175, 750, -185, 736, -185, 729, -176, 716, -176)
+
+[node name="frog6" type="Line2D" parent="aperture_slide_r/Aperture_r/slide10/contents/frog"]
+position = Vector2(62.9316, -272.236)
+rotation = 0.523598
+points = PackedVector2Array(747, -210, 738, -208, 731, -215, 726, -206, 716, -202, 728, -191, 744, -195)
+closed = true
+width = 12.0
+default_color = Color(1, 0.862745, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide11" type="Node2D" parent="aperture_slide_r/Aperture_r"]
+rotation = -4.18879
+
+[node name="contents" type="Node2D" parent="aperture_slide_r/Aperture_r/slide11"]
+position = Vector2(-2050, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_r/Aperture_r/slide11/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Node2D" parent="aperture_slide_r/Aperture_r/slide11/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D4" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+points = PackedVector2Array(653, 88, 636, 86, 618, 66, 595, 24)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D8" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+points = PackedVector2Array(643, 96, 636, 87, 624, 94)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+position = Vector2(-24, 13)
+points = PackedVector2Array(510, 11, 528, -24, 541, -24, 547, -17, 571, -18, 576, -23, 594, -22, 608, -15, 662, -29, 693, -9, 680, 21, 605, 28, 580, 34, 531, 37)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(510, 11, 528, -24, 541, -24, 547, -17, 571, -18, 576, -23, 594, -22, 608, -15, 662, -29, 693, -9, 680, 21, 605, 28, 580, 34, 531, 37)
+
+[node name="Line2D9" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+points = PackedVector2Array(559, 6, 561, 14)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+points = PackedVector2Array(510, 8, 509, 12)
+width = 12.0
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D5" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+position = Vector2(100, -24)
+points = PackedVector2Array(620, 43, 630, 55, 613, 73, 550, 25)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D6" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+position = Vector2(102, -24)
+points = PackedVector2Array(651, 52, 628, 54, 638, 45)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+position = Vector2(16, -24)
+points = PackedVector2Array(366, 87, 384, 90, 440, 77, 476, 57)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D7" type="Line2D" parent="aperture_slide_r/Aperture_r/slide11/contents/frog"]
+position = Vector2(0, 13)
+points = PackedVector2Array(396, 65, 399, 53, 385, 63)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="slide12" type="Node2D" parent="aperture_slide_r/Aperture_r"]
+rotation = -5.23599
+
+[node name="contents" type="Node2D" parent="aperture_slide_r/Aperture_r/slide12"]
+position = Vector2(-2050, 0)
+
+[node name="terrain" type="Node2D" parent="aperture_slide_r/Aperture_r/slide12/contents"]
+
+[node name="Line2D10" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/terrain"]
+position = Vector2(28, 116)
+points = PackedVector2Array(1213, -86, 1113, -68, 981, -79, 758, -44, 627, -32, 392, -115, 268, -136)
+width = 12.0
+default_color = Color(0.501961, 0.501961, 0.501961, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="frog" type="Node2D" parent="aperture_slide_r/Aperture_r/slide12/contents"]
+position = Vector2(28, 103)
+
+[node name="Line2D8" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+points = PackedVector2Array(602, 88, 586, 97, 582, 87)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+points = PackedVector2Array(488, 35, 510, 11, 528, -24, 541, -24, 547, -17, 571, -18, 576, -23, 594, -22, 598, -5, 600, 27, 577, 35, 569, 58, 532, 79, 479, 79, 468, 54)
+closed = true
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog/Line2D"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(496, 25, 518, -1, 528, -24, 542, -17, 571, -18, 594, -22, 598, -5, 600, 27, 577, 35, 569, 58, 532, 79, 479, 79, 468, 54)
+
+[node name="Line2D4" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+points = PackedVector2Array(608, 104, 584, 99, 552, 105, 539, 55)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D5" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+points = PackedVector2Array(620, 43, 630, 55, 613, 73, 557, 32)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D6" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+points = PackedVector2Array(651, 52, 628, 54, 638, 45)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+position = Vector2(0, 13)
+points = PackedVector2Array(450, 95, 432, 93, 407, 77, 476, 57)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D7" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/frog"]
+position = Vector2(0, 13)
+points = PackedVector2Array(447, 83, 427, 91, 424, 79)
+width = 12.0
+default_color = Color(0, 1, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="dragon" type="Node2D" parent="aperture_slide_r/Aperture_r/slide12/contents"]
+
+[node name="Line2D13" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon"]
+position = Vector2(48, 129)
+points = PackedVector2Array(912, -247, 871, -275, 876, -257, 863, -263, 839, -280, 832, -305, 820, -324, 804, -337, 786, -347, 776, -366, 774, -382, 761, -401, 734, -413, 723, -410, 727, -384, 744, -370, 745, -351, 769, -324, 813, -291, 830, -273, 871, -251, 867, -238)
+closed = true
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D16" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon"]
+position = Vector2(0, 136)
+points = PackedVector2Array(832, -283, 821, -281, 818, -267, 823, -256, 835, -261, 833, -268, 838, -273)
+closed = true
+width = 12.0
+default_color = Color(0.870588, 0.784314, 0.890196, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D15" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon"]
+position = Vector2(48, 129)
+points = PackedVector2Array(804, -268, 814, -263, 818, -257)
+width = 12.0
+default_color = Color(1, 1, 0.439216, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D14" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon"]
+position = Vector2(48, 129)
+points = PackedVector2Array(800, -281, 795, -304, 785, -312, 785, -278, 793, -260, 805, -261)
+closed = true
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Line2D11" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon"]
+position = Vector2(28, 116)
+points = PackedVector2Array(575, -312, 622, -302, 656, -252, 700, -290, 758, -300, 807, -280, 805, -321, 790, -336, 701, -329, 619, -358, 528, -298)
+closed = true
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Polygon2D" type="Polygon2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon/Line2D11"]
+show_behind_parent = true
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(575, -312, 622, -302, 656, -252, 703, -292, 758, -297, 806, -281, 805, -321, 790, -336, 701, -329, 619, -358, 528, -298)
+
+[node name="Line2D12" type="Line2D" parent="aperture_slide_r/Aperture_r/slide12/contents/dragon"]
+position = Vector2(28, 116)
+points = PackedVector2Array(986, -368, 974, -355, 975, -327, 906, -333, 882, -326, 881, -292, 820, -324, 804, -337, 895, -367, 930, -403, 1046, -378)
+closed = true
+width = 12.0
+default_color = Color(0.686275, 0, 0, 1)
+texture = ExtResource("1_u77jx")
+texture_mode = 1
+
+[node name="Panel2" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_032cs")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel2"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Prev_slide" type="Button" parent="Panel2/HBoxContainer"]
+layout_mode = 2
+disabled = true
+icon = ExtResource("2_3n84q")
+
+[node name="Next_slide" type="Button" parent="Panel2/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("3_facs1")
+
+[node name="Panel3" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 200.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_wk4mm")
+
+[node name="Clicker" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamRandomizer_fguns")
+
+[connection signal="pressed" from="Panel2/HBoxContainer/Prev_slide" to="." method="_on_prev_slide_pressed"]
+[connection signal="pressed" from="Panel2/HBoxContainer/Next_slide" to="." method="_on_next_slide_pressed"]
