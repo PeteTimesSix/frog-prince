@@ -1,0 +1,145 @@
+[gd_scene load_steps=8 format=3 uid="uid://drg3of74mdmgf"]
+
+[ext_resource type="Texture2D" uid="uid://cylaq50g38p4n" path="res://Materials/beam.tres" id="1_n4hog"]
+
+[sub_resource type="GDScript" id="GDScript_ndsgp"]
+script/source = "extends Node2D
+
+@onready var anim: AnimationPlayer = $AnimationPlayer
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	rotation = randf() * PI * 2
+	anim.play(\"splash\")
+"
+
+[sub_resource type="Curve" id="Curve_xqax4"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.115254, 1), 0.0, 0.0, 0, 0, Vector2(0.888136, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Curve" id="Curve_mjn45"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.123778, 1), 0.0, 0.0, 0, 0, Vector2(0.850163, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Animation" id="Animation_bfc4n"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Line2D:points")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [PackedVector2Array(4, -11, 11, -6, 13, 3, 9, 10, 4, 13)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Line2D2:points")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [PackedVector2Array(-7, -11, -13, -6, -14, 1, -12, 8, -6, 12)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_nwuj0"]
+resource_name = "splash"
+length = 1.8
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Line2D:points")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [PackedVector2Array(4, -11, 11, -6, 13, 3, 9, 10, 4, 13), PackedVector2Array(5, -13, 15, -8, 18, 4, 13, 10, 7, 14), PackedVector2Array(12, -15, 17, -10, 19, 5, 14, 13, 7, 17)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Line2D2:points")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [PackedVector2Array(-7, -11, -13, -6, -14, 1, -12, 8, -6, 12), PackedVector2Array(-9, -13, -15, -7, -16, 1, -13, 9, -7, 15), PackedVector2Array(-9, -16, -14, -10, -19, 0, -15, 10, -9, 17)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(3.5),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"queue_free"
+}]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hu2dj"]
+_data = {
+"RESET": SubResource("Animation_bfc4n"),
+"splash": SubResource("Animation_nwuj0")
+}
+
+[node name="DeathSplash" type="Node2D"]
+script = SubResource("GDScript_ndsgp")
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(4, -11, 11, -6, 13, 3, 9, 10, 4, 13)
+width = 2.0
+width_curve = SubResource("Curve_xqax4")
+default_color = Color(0, 1, 1, 1)
+texture = ExtResource("1_n4hog")
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="."]
+points = PackedVector2Array(-7, -11, -13, -6, -14, 1, -12, 8, -6, 12)
+width = 2.0
+width_curve = SubResource("Curve_mjn45")
+default_color = Color(0, 1, 1, 1)
+texture = ExtResource("1_n4hog")
+texture_mode = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_hu2dj")
+}

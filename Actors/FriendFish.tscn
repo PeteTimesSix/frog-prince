@@ -1,0 +1,175 @@
+[gd_scene load_steps=10 format=3 uid="uid://bn7inycqv5v4t"]
+
+[ext_resource type="Texture2D" uid="uid://cylaq50g38p4n" path="res://Materials/beam.tres" id="1_y3q1e"]
+[ext_resource type="PackedScene" uid="uid://djg5utr63gton" path="res://Components/LineJiggler.tscn" id="2_pk5fk"]
+[ext_resource type="PackedScene" uid="uid://bejuqhdkh5ykp" path="res://Actors/PlayerFrog.tscn" id="3_11tw3"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yy6j1"]
+radius = 17.0
+height = 76.0
+
+[sub_resource type="Curve" id="Curve_i2wk8"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.0642202, 1), 0.0, 0.0, 0, 0, Vector2(0.938838, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Animation" id="Animation_uqcp6"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("tail:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("tail:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_7etg2"]
+resource_name = "idle"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("tail:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("tail:rotation")
+tracks/1/interp = 4
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5, 1, 1.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.148701, 0.00563528, -0.119377]
+}
+
+[sub_resource type="Animation" id="Animation_261j1"]
+resource_name = "swim"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("tail:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("tail:rotation")
+tracks/1/interp = 4
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.8, 1),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.261799, -0.261799, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_nuuqd"]
+_data = {
+"RESET": SubResource("Animation_uqcp6"),
+"idle": SubResource("Animation_7etg2"),
+"swim": SubResource("Animation_261j1")
+}
+
+[node name="FriendFish" type="CharacterBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(30, 0)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_yy6j1")
+
+[node name="body" type="Line2D" parent="."]
+points = PackedVector2Array(-9, 0, 12, -10, 34, -15, 57, -12, 66, 0, 57, 12, 35, 14, 13, 10)
+closed = true
+width = 2.0
+default_color = Color(0.691743, 0.545298, 0.72485, 1)
+texture = ExtResource("1_y3q1e")
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="body"]
+points = PackedVector2Array(-2, 0, 13, -2, 21, 0, 13, 2)
+closed = true
+width = 2.0
+default_color = Color(0.883899, 0.442864, 0.565202, 1)
+texture = ExtResource("1_y3q1e")
+texture_mode = 1
+
+[node name="water1" type="Line2D" parent="body"]
+points = PackedVector2Array(71, -4, 67, -13, 48, -19, 22, -18, 0, -11, -14, -4)
+width = 2.0
+width_curve = SubResource("Curve_i2wk8")
+default_color = Color(0, 1, 1, 1)
+texture = ExtResource("1_y3q1e")
+texture_mode = 1
+
+[node name="LineJiggler" parent="body/water1" instance=ExtResource("2_pk5fk")]
+
+[node name="water2" type="Line2D" parent="body"]
+points = PackedVector2Array(71, 3, 68, 12, 50, 19, 22, 18, 0, 11, -13, 5)
+width = 2.0
+width_curve = SubResource("Curve_i2wk8")
+default_color = Color(0, 1, 1, 1)
+texture = ExtResource("1_y3q1e")
+texture_mode = 1
+
+[node name="LineJiggler" parent="body/water2" instance=ExtResource("2_pk5fk")]
+
+[node name="tail" type="Node2D" parent="."]
+
+[node name="Line2D2" type="Line2D" parent="tail"]
+points = PackedVector2Array(-51, 0, -46, -3, -33, -2, -30, 0, -33, 2, -46, 3)
+closed = true
+width = 2.0
+default_color = Color(0.882353, 0.443137, 0.564706, 1)
+texture = ExtResource("1_y3q1e")
+texture_mode = 1
+
+[node name="back_water" type="Line2D" parent="tail/Line2D2"]
+points = PackedVector2Array(-40, 8, -28, 6, -24, 0, -28, -6, -40, -8)
+width = 2.0
+width_curve = SubResource("Curve_i2wk8")
+default_color = Color(0, 1, 1, 1)
+texture = ExtResource("1_y3q1e")
+texture_mode = 1
+
+[node name="LineJiggler" parent="tail/Line2D2/back_water" instance=ExtResource("2_pk5fk")]
+
+[node name="PlayerFrog" parent="." instance=ExtResource("3_11tw3")]
+position = Vector2(94, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_nuuqd")
+}
