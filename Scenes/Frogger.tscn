@@ -1824,7 +1824,6 @@ libraries = {
 [node name="Actors" type="Node2D" parent="World"]
 
 [node name="PlayerFrog" parent="World/Actors" instance=ExtResource("4_pciln")]
-position = Vector2(-236, -3300)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
