@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://d16p4as0ij3jj"]
+[gd_scene load_steps=55 format=3 uid="uid://d16p4as0ij3jj"]
 
 [ext_resource type="Script" path="res://Nodes/FollowingCamera.gd" id="1_epq8s"]
 [ext_resource type="Texture2D" uid="uid://cylaq50g38p4n" path="res://Materials/beam.tres" id="2_w0mfc"]
@@ -9,9 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://drg3of74mdmgf" path="res://Actors/DeathSplash.tscn" id="4_jmljk"]
 [ext_resource type="PackedScene" uid="uid://bejuqhdkh5ykp" path="res://Actors/PlayerFrog.tscn" id="4_pciln"]
 [ext_resource type="Script" path="res://Nodes/LineDoubler.gd" id="4_tvlmy"]
-[ext_resource type="Script" path="res://Actors/moving_platform.gd" id="4_x8bv8"]
 [ext_resource type="PackedScene" uid="uid://42m84aobbsml" path="res://Terrain/Water/rock_B.tscn" id="5_8fw4p"]
-[ext_resource type="Texture2D" uid="uid://cxtls4g53iei6" path="res://icon.svg" id="5_m4b3u"]
 [ext_resource type="PackedScene" uid="uid://bbub5a4275okr" path="res://Terrain/Water/rock_C.tscn" id="6_orrry"]
 [ext_resource type="PackedScene" uid="uid://be0fst1ak6l5g" path="res://Terrain/Water/flowing_water.tscn" id="7_nub6b"]
 [ext_resource type="PackedScene" uid="uid://q28iqbpoywr8" path="res://Terrain/Water/log.tscn" id="8_ojjpb"]
@@ -493,74 +491,6 @@ point_count = 10
 [sub_resource type="Curve" id="Curve_1o0k5"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.0651466, 1), 0.0, 0.0, 0, 0, Vector2(0.90228, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 4
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_tmn84"]
-radius = 8.06226
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_an21a"]
-size = Vector2(31.9038, 31.9038)
-
-[sub_resource type="Animation" id="Animation_0bsl4"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(58.09, -43.35)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [1.01901]
-}
-
-[sub_resource type="Animation" id="Animation_rd0ku"]
-resource_name = "move"
-length = 6.0
-loop_mode = 2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 2, 6),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(58.09, -43.35), Vector2(-104, -41), Vector2(-21, 55)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 2, 6),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [1.01901, -0.724861, -2.64536]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_0020e"]
-_data = {
-"RESET": SubResource("Animation_0bsl4"),
-"move": SubResource("Animation_rd0ku")
-}
 
 [node name="Frogger" type="Node"]
 script = SubResource("GDScript_kj22x")
@@ -1808,45 +1738,6 @@ target_scene = ExtResource("16_3u8yo")
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="World/Terrain/Lake_top/EndTrigger"]
 modulate = Color(1, 1, 1, 0.345098)
 polygon = PackedVector2Array(287, -235, 286, 31, -285, 31, -274, -237)
-
-[node name="MovingObjects" type="Node2D" parent="World"]
-
-[node name="RigidBody2D" type="RigidBody2D" parent="World/MovingObjects"]
-position = Vector2(520, -102)
-collision_layer = 261
-collision_mask = 0
-can_sleep = false
-
-[node name="Polygon2D" type="Polygon2D" parent="World/MovingObjects/RigidBody2D"]
-color = Color(0.625711, 0.600357, 0.625676, 1)
-polygon = PackedVector2Array(-1, -9, 4, -8, 8, -4, 10, 0, 6, 6, 0, 9, -7, 6, -8, 0, -7, -5, -3, -9)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/MovingObjects/RigidBody2D"]
-shape = SubResource("CircleShape2D_tmn84")
-
-[node name="TestPlatformAnchor" type="Node2D" parent="World/MovingObjects"]
-position = Vector2(629, 102)
-
-[node name="TestPlatform" type="AnimatableBody2D" parent="World/MovingObjects/TestPlatformAnchor"]
-position = Vector2(58.09, -43.35)
-rotation = 1.01901
-collision_layer = 5
-collision_mask = 0
-sync_to_physics = false
-script = ExtResource("4_x8bv8")
-
-[node name="Sprite2D" type="Sprite2D" parent="World/MovingObjects/TestPlatformAnchor/TestPlatform"]
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("5_m4b3u")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/MovingObjects/TestPlatformAnchor/TestPlatform"]
-position = Vector2(-0.0576038, -0.266708)
-shape = SubResource("RectangleShape2D_an21a")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="World/MovingObjects/TestPlatformAnchor/TestPlatform"]
-libraries = {
-"": SubResource("AnimationLibrary_0020e")
-}
 
 [node name="Actors" type="Node2D" parent="World"]
 
