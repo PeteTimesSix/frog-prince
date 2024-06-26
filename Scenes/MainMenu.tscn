@@ -51,10 +51,6 @@ func _on_begin_pressed():
 func _on_exit_pressed():
 	get_tree().root.propagate_notification(NOTIFICATION_WM_CLOSE_REQUEST)
 	get_tree().quit()
-
-
-func _on_volume_drag_ended(value_changed):
-	pass # Replace with function body.
 "
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tuiu0"]
@@ -76,6 +72,7 @@ script/source = "extends HSlider
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	value = Config.difficulty_modifier
 	update()
 
 func update():
@@ -176,58 +173,63 @@ theme_override_styles/separator = SubResource("StyleBoxFlat_tuiu0")
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/PanelContainer3"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3"]
 layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 8
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer"]
 layout_mode = 2
 size_flags_vertical = 8
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 text = "Volume"
 
-[node name="TestSound" type="AudioStreamPlayer" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer"]
+[node name="TestSound" type="AudioStreamPlayer" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer"]
 stream = SubResource("AudioStreamRandomizer_d3vag")
 
-[node name="Volume" type="HSlider" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer"]
+[node name="Volume" type="HSlider" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-focus_neighbor_top = NodePath("../../../VBoxContainer/Exit")
+focus_neighbor_top = NodePath("../../../../VBoxContainer/Exit")
 focus_neighbor_bottom = NodePath("../../../MarginContainer2/VBoxContainer/HBoxContainer/Difficulty")
 focus_next = NodePath("../../../MarginContainer2/VBoxContainer/HBoxContainer/Difficulty")
-focus_previous = NodePath("../../../VBoxContainer/Exit")
+focus_previous = NodePath("../../../../VBoxContainer/Exit")
 max_value = 1.0
 step = 0.05
 script = ExtResource("5_s0iqj")
 
-[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/VBoxContainer/PanelContainer3"]
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 8
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 8
 alignment = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Difficulty:"
 
-[node name="Difficulty" type="HSlider" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="Difficulty" type="HSlider" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 focus_neighbor_top = NodePath("../../../../MarginContainer/HBoxContainer/Volume")
@@ -240,17 +242,17 @@ step = 0.25
 value = 1.0
 script = SubResource("GDScript_qw7m8")
 
-[node name="DifficultyLabel" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/HBoxContainer"]
+[node name="DifficultyLabel" type="Label" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 text = "Normal"
 horizontal_alignment = 2
 
-[node name="KBMouse" type="CheckButton" parent="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer"]
+[node name="KBMouse" type="CheckButton" parent="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer"]
 layout_mode = 2
 focus_neighbor_top = NodePath("../HBoxContainer/Difficulty")
-focus_neighbor_bottom = NodePath("../../../VBoxContainer/Begin")
-focus_next = NodePath("../../../VBoxContainer/Begin")
+focus_neighbor_bottom = NodePath("../../../../VBoxContainer/Begin")
+focus_next = NodePath("../../../../VBoxContainer/Begin")
 focus_previous = NodePath("../HBoxContainer/Difficulty")
 text = "Controls: Tank / Mouse"
 script = SubResource("GDScript_065k0")
@@ -262,10 +264,10 @@ alignment = 1
 
 [node name="Begin" type="Button" parent="PanelContainer/VBoxContainer/PanelContainer3/VBoxContainer"]
 layout_mode = 2
-focus_neighbor_top = NodePath("../../MarginContainer2/VBoxContainer/KBMouse")
+focus_neighbor_top = NodePath("../../HBoxContainer/MarginContainer2/VBoxContainer/KBMouse")
 focus_neighbor_bottom = NodePath("../Exit")
 focus_next = NodePath("../Exit")
-focus_previous = NodePath("../../MarginContainer2/VBoxContainer/KBMouse")
+focus_previous = NodePath("../../HBoxContainer/MarginContainer2/VBoxContainer/KBMouse")
 theme_override_fonts/font = ExtResource("1_15ak5")
 theme_override_font_sizes/font_size = 30
 text = "Begin"
@@ -273,17 +275,17 @@ text = "Begin"
 [node name="Exit" type="Button" parent="PanelContainer/VBoxContainer/PanelContainer3/VBoxContainer"]
 layout_mode = 2
 focus_neighbor_top = NodePath("../Begin")
-focus_neighbor_bottom = NodePath("../../MarginContainer/HBoxContainer/Volume")
-focus_next = NodePath("../../MarginContainer/HBoxContainer/Volume")
+focus_neighbor_bottom = NodePath("../../HBoxContainer/MarginContainer/HBoxContainer/Volume")
+focus_next = NodePath("../../HBoxContainer/MarginContainer/HBoxContainer/Volume")
 focus_previous = NodePath("../Begin")
 theme_override_fonts/font = ExtResource("1_15ak5")
 theme_override_font_sizes/font_size = 30
 text = "Exit
 "
 
-[connection signal="drag_ended" from="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer/Volume" to="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer/Volume" method="_on_drag_ended"]
-[connection signal="value_changed" from="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer/Volume" to="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer/HBoxContainer/Volume" method="_on_value_changed"]
-[connection signal="value_changed" from="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/HBoxContainer/Difficulty" to="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/HBoxContainer/Difficulty" method="_on_value_changed"]
-[connection signal="toggled" from="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/KBMouse" to="PanelContainer/VBoxContainer/PanelContainer3/MarginContainer2/VBoxContainer/KBMouse" method="_on_toggled"]
+[connection signal="drag_ended" from="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer/Volume" to="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer/Volume" method="_on_drag_ended"]
+[connection signal="value_changed" from="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer/Volume" to="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer/HBoxContainer/Volume" method="_on_value_changed"]
+[connection signal="value_changed" from="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer/Difficulty" to="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/HBoxContainer/Difficulty" method="_on_value_changed"]
+[connection signal="toggled" from="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/KBMouse" to="PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MarginContainer2/VBoxContainer/KBMouse" method="_on_toggled"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/PanelContainer3/VBoxContainer/Begin" to="." method="_on_begin_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/PanelContainer3/VBoxContainer/Exit" to="." method="_on_exit_pressed"]

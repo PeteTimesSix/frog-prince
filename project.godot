@@ -21,9 +21,9 @@ buses/default_bus_layout="res://Autoloads/audio_bus_layout.tres"
 
 [autoload]
 
-Config="*res://Autoloads/Config.gd"
 Fader="*res://Components/FadeToBlack.tscn"
 WinState="*res://Autoloads/WinState.gd"
+Config="*res://Autoloads/Config.gd"
 
 [debug]
 
